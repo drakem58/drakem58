@@ -1,0 +1,188 @@
+# vxdg list
+NAME         STATE           ID
+alnradardb_dirdg1 enabled,cds          1168278755.182.alnradarmind-c1
+alnradarapp_sync enabled,cds          1344275487.163.alnradarmind-c1
+alnradardb_dirdg2 enabled,cds          1168292549.76.alnradarmind-c1
+[root@alnradarmind-c1: / ]
+#                                                                                       
+[root@alnradarmind-c1: / ]
+# vxinfo -g alnradarapp_sync
+imail_sync     fsgen    Started
+[root@alnradarmind-c1: / ]
+# vxassist maxgrow imail_sync
+VxVM vxassist ERROR V-5-1-5455 Operation requires a disk group
+[root@alnradarmind-c1: / ]
+
+[root@alnradarmind-c1: / ]
+# vxassist -g alnradarapp_sync maxgrow imail_sync
+Volume imail_sync can be extended by 1278728192 to: 2117588992 (1033979Mb)
+
+YOU CAN DO THIS TWO WAYS
+
+vxassist -g <diskgroup> growby <volume> <len_to_grow_by> = 1033979Mb
+		or
+	vxassist -g <diskgroup> growto <volume> <new_len> = 2117588992 
+
+[root@alnradarmind-c1: / ]
+# vxprint -g alnradarapp_sync -hrt imail_sync              
+ST NAME         STATE        DM_CNT   SPARE_CNT         APPVOL_CNT
+DM NAME         DEVICE       TYPE     PRIVLEN  PUBLEN   STATE
+RV NAME         RLINK_CNT    KSTATE   STATE    PRIMARY  DATAVOLS  SRL
+RL NAME         RVG          KSTATE   STATE    REM_HOST REM_DG    REM_RLNK
+CO NAME         CACHEVOL     KSTATE   STATE
+VT NAME         RVG          KSTATE   STATE    NVOLUME
+V  NAME         RVG/VSET/CO  KSTATE   STATE    LENGTH   READPOL   PREFPLEX UTYPE
+PL NAME         VOLUME       KSTATE   STATE    LENGTH   LAYOUT    NCOL/WID MODE
+SD NAME         PLEX         DISK     DISKOFFS LENGTH   [COL/]OFF DEVICE   MODE
+SV NAME         PLEX         VOLNAME  NVOLLAYR LENGTH   [COL/]OFF AM/NM    MODE
+SC NAME         PLEX         CACHE    DISKOFFS LENGTH   [COL/]OFF DEVICE   MODE
+DC NAME         PARENTVOL    LOGVOL
+SP NAME         SNAPVOL      DCO
+EX NAME         ASSOC        VC                       PERMS    MODE     STATE
+SR NAME         KSTATE
+
+dm data-d64     emcpower67s2 auto     65536    70586368 -
+dm data-d65     emcpower68s2 auto     65536    70586368 -
+dm data-d66     emcpower69s2 auto     65536    70586368 -
+dm data-d67     emcpower70s2 auto     65536    70586368 -
+dm data-d68     emcpower71s2 auto     65536    70586368 -
+dm data-d69     emcpower72s2 auto     65536    70586368 -
+dm data-d70     emcpower73s2 auto     65536    70586368 -
+dm data-d71     emcpower74s2 auto     65536    70586368 -
+dm data-d72     emcpower75s2 auto     65536    70586368 -
+dm data-d73     emcpower76s2 auto     65536    70586368 -
+dm data-d74     emcpower77s2 auto     65536    70586368 -
+dm data-d75     emcpower78s2 auto     65536    70586368 -
+
+v  imail_sync   -            ENABLED  ACTIVE   838860800 SELECT   imail_sync-01 fsgen
+pl imail_sync-01 imail_sync  ENABLED  ACTIVE   838861824 STRIPE   6/256    RW
+sd data-d64-01  imail_sync-01 data-d64 0       70586368 0/0       emcpower67 ENA
+sd data-d70-01  imail_sync-01 data-d70 0       69223936 0/70586368 emcpower73 ENA
+sd data-d65-01  imail_sync-01 data-d65 0       70586368 1/0       emcpower68 ENA
+sd data-d71-01  imail_sync-01 data-d71 0       69223936 1/70586368 emcpower74 ENA
+sd data-d66-01  imail_sync-01 data-d66 0       70586368 2/0       emcpower69 ENA
+sd data-d72-01  imail_sync-01 data-d72 0       69223936 2/70586368 emcpower75 ENA
+sd data-d67-01  imail_sync-01 data-d67 0       70586368 3/0       emcpower70 ENA
+sd data-d73-01  imail_sync-01 data-d73 0       69223936 3/70586368 emcpower76 ENA
+sd data-d68-01  imail_sync-01 data-d68 0       70586368 4/0       emcpower71 ENA
+sd data-d74-01  imail_sync-01 data-d74 0       69223936 4/70586368 emcpower77 ENA
+sd data-d69-01  imail_sync-01 data-d69 0       70586368 5/0       emcpower72 ENA
+sd data-d75-01  imail_sync-01 data-d75 0       69223936 5/70586368 emcpower78 ENA
+[root@alnradarmind-c1: / ]
+# 
+
+AND NOW 
+
+# vxassist -g alnradarapp_sync growto imail_sync 2117588992
+
+BUT, I USED ufs rather than vxfs, since nothing was on it, just ran the CORRECT mkfs under
+/opt/VRTS/bin directory
+
+/opt/VRTS/bin/mkfs -F vxfs /dev/vx/rdsk/alnradarapp_sync/imail_sync
+
+
+[root@alnradarmind-c1: / ]
+# vxprint -g alnradarapp_sync -hrt imail_sync              
+ST NAME         STATE        DM_CNT   SPARE_CNT         APPVOL_CNT
+DM NAME         DEVICE       TYPE     PRIVLEN  PUBLEN   STATE
+RV NAME         RLINK_CNT    KSTATE   STATE    PRIMARY  DATAVOLS  SRL
+RL NAME         RVG          KSTATE   STATE    REM_HOST REM_DG    REM_RLNK
+CO NAME         CACHEVOL     KSTATE   STATE
+VT NAME         RVG          KSTATE   STATE    NVOLUME
+V  NAME         RVG/VSET/CO  KSTATE   STATE    LENGTH   READPOL   PREFPLEX UTYPE
+PL NAME         VOLUME       KSTATE   STATE    LENGTH   LAYOUT    NCOL/WID MODE
+SD NAME         PLEX         DISK     DISKOFFS LENGTH   [COL/]OFF DEVICE   MODE
+SV NAME         PLEX         VOLNAME  NVOLLAYR LENGTH   [COL/]OFF AM/NM    MODE
+SC NAME         PLEX         CACHE    DISKOFFS LENGTH   [COL/]OFF DEVICE   MODE
+DC NAME         PARENTVOL    LOGVOL
+SP NAME         SNAPVOL      DCO
+EX NAME         ASSOC        VC                       PERMS    MODE     STATE
+SR NAME         KSTATE
+
+dm data-d64     emcpower67s2 auto     65536    70586368 -
+dm data-d65     emcpower68s2 auto     65536    70586368 -
+dm data-d66     emcpower69s2 auto     65536    70586368 -
+dm data-d67     emcpower70s2 auto     65536    70586368 -
+dm data-d68     emcpower71s2 auto     65536    70586368 -
+dm data-d69     emcpower72s2 auto     65536    70586368 -
+dm data-d70     emcpower73s2 auto     65536    70586368 -
+dm data-d71     emcpower74s2 auto     65536    70586368 -
+dm data-d72     emcpower75s2 auto     65536    70586368 -
+dm data-d73     emcpower76s2 auto     65536    70586368 -
+dm data-d74     emcpower77s2 auto     65536    70586368 -
+dm data-d75     emcpower78s2 auto     65536    70586368 -
+dm data-d76     emcpower79s2 auto     65536    70586368 -
+dm data-d77     emcpower80s2 auto     65536    70586368 -
+dm data-d78     emcpower81s2 auto     65536    70586368 -
+dm data-d79     emcpower82s2 auto     65536    70586368 -
+dm data-d80     emcpower83s2 auto     65536    70586368 -
+dm data-d81     emcpower84s2 auto     65536    70586368 -
+dm data-d82     emcpower85s2 auto     65536    70586368 -
+dm data-d83     emcpower86s2 auto     65536    70586368 -
+dm data-d84     emcpower87s2 auto     65536    70586368 -
+dm data-d85     emcpower88s2 auto     65536    70586368 -
+dm data-d86     emcpower89s2 auto     65536    70586368 -
+dm data-d87     emcpower90s2 auto     65536    70586368 -
+dm data-d88     emcpower91s2 auto     65536    70586368 -
+dm data-d89     emcpower92s2 auto     65536    70586368 -
+dm data-d90     emcpower93s2 auto     65536    70586368 -
+dm data-d91     emcpower94s2 auto     65536    70586368 -
+dm data-d92     emcpower95s2 auto     65536    70586368 -
+dm data-d93     emcpower96s2 auto     65536    70586368 -
+
+v  imail_sync   -            ENABLED  ACTIVE   2117588992 SELECT  imail_sync-01 fsgen
+pl imail_sync-01 imail_sync  ENABLED  ACTIVE   2117589504 STRIPE  6/256    RW
+sd data-d64-01  imail_sync-01 data-d64 0       70586368 0/0       emcpower67 ENA
+sd data-d70-01  imail_sync-01 data-d70 0       70586368 0/70586368 emcpower73 ENA
+sd data-d76-01  imail_sync-01 data-d76 0       70586368 0/141172736 emcpower79 ENA
+sd data-d82-01  imail_sync-01 data-d82 0       70586368 0/211759104 emcpower85 ENA
+sd data-d88-01  imail_sync-01 data-d88 0       70586112 0/282345472 emcpower91 ENA
+sd data-d65-01  imail_sync-01 data-d65 0       70586368 1/0       emcpower68 ENA
+sd data-d71-01  imail_sync-01 data-d71 0       70586368 1/70586368 emcpower74 ENA
+sd data-d77-01  imail_sync-01 data-d77 0       70586368 1/141172736 emcpower80 ENA
+sd data-d83-01  imail_sync-01 data-d83 0       70586368 1/211759104 emcpower86 ENA
+sd data-d89-01  imail_sync-01 data-d89 0       70586112 1/282345472 emcpower92 ENA
+sd data-d66-01  imail_sync-01 data-d66 0       70586368 2/0       emcpower69 ENA
+sd data-d72-01  imail_sync-01 data-d72 0       70586368 2/70586368 emcpower75 ENA
+sd data-d78-01  imail_sync-01 data-d78 0       70586368 2/141172736 emcpower81 ENA
+sd data-d84-01  imail_sync-01 data-d84 0       70586368 2/211759104 emcpower87 ENA
+sd data-d90-01  imail_sync-01 data-d90 0       70586112 2/282345472 emcpower93 ENA
+sd data-d67-01  imail_sync-01 data-d67 0       70586368 3/0       emcpower70 ENA
+sd data-d73-01  imail_sync-01 data-d73 0       70586368 3/70586368 emcpower76 ENA
+sd data-d79-01  imail_sync-01 data-d79 0       70586368 3/141172736 emcpower82 ENA
+sd data-d85-01  imail_sync-01 data-d85 0       70586368 3/211759104 emcpower88 ENA
+sd data-d91-01  imail_sync-01 data-d91 0       70586112 3/282345472 emcpower94 ENA
+sd data-d68-01  imail_sync-01 data-d68 0       70586368 4/0       emcpower71 ENA
+sd data-d74-01  imail_sync-01 data-d74 0       70586368 4/70586368 emcpower77 ENA
+sd data-d80-01  imail_sync-01 data-d80 0       70586368 4/141172736 emcpower83 ENA
+sd data-d86-01  imail_sync-01 data-d86 0       70586368 4/211759104 emcpower89 ENA
+sd data-d92-01  imail_sync-01 data-d92 0       70586112 4/282345472 emcpower95 ENA
+sd data-d69-01  imail_sync-01 data-d69 0       70586368 5/0       emcpower72 ENA
+sd data-d75-01  imail_sync-01 data-d75 0       70586368 5/70586368 emcpower78 ENA
+sd data-d81-01  imail_sync-01 data-d81 0       70586368 5/141172736 emcpower84 ENA
+sd data-d87-01  imail_sync-01 data-d87 0       70586368 5/211759104 emcpower90 ENA
+sd data-d93-01  imail_sync-01 data-d93 0       70586112 5/282345472 emc
+
+needed to rerun the mkfs command correctly
+
+/opt/VRTS/bin/mkfs –F vxfs /dev/vx/rdsk/alnradarapp_sync/imail_sync
+
+that will force the correct mkfs command to run
+
+NOW TO DEPORT DISK GROUP
+
+umount /imailsync
+
+vxvol -g alnradarapp_sync stopall
+
+vxdg deport alnradarapp_sync 
+
+NOW IMPORT ON the OTHER NODE
+
+vxdg import alnradarapp_sync 
+
+vxvol -g alnradarapp_sync startall
+
+vxvol -g alnradarapp_sync resync imail_sync
+
+mount -F vxfs /dev/vx/dsk/alnradarapp_sync/imail_sync /imailsync
