@@ -1,0 +1,8 @@
+Quick loop in CLI via bash shell
+
+bash
+while (true)
+> do
+> command here
+> sleep 60
+> done
