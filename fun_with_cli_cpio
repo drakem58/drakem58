@@ -1,0 +1,17 @@
+copy a directory to another directory
+
+cd /home/md6270
+
+find . -depth -print |cpio -pamVd /tmp/test
+
+Next, if want to cpio up a directory do this
+
+cd /appl/dpa
+
+find . |cpio -odvum > /usr/openv/dpa_out.cpio
+
+Now you want to extract the file
+
+cd into directory, copy the file there
+
+cpio -idvum < dpa_out.cpio
