@@ -1,0 +1,179 @@
+Fun with Linux routing
+
+Show the routes in Linux
+ip route show
+
+You should see something like this
+155.174.2.40 via 10.37.160.1 dev bond0 
+10.37.137.119 via 10.37.160.1 dev bond0 
+10.37.150.220 via 10.37.160.1 dev bond0 
+135.157.253.147 via 10.37.160.1 dev bond0 
+155.174.71.135 via 10.37.160.1 dev bond0 
+155.174.69.135 via 10.37.160.1 dev bond0 
+155.174.7.96 via 10.37.160.1 dev bond0 
+10.37.30.29 via 10.37.160.1 dev bond0 
+10.40.3.8 via 10.37.160.1 dev bond0 
+155.174.8.96 via 10.37.160.1 dev bond0 
+10.37.137.120 via 10.37.160.1 dev bond0 
+10.37.151.248 via 10.37.160.1 dev bond0 
+172.27.1.21 via 10.37.160.1 dev bond0 
+172.27.1.20 via 10.37.160.1 dev bond0 
+155.174.15.29 via 10.37.160.1 dev bond0 
+10.37.150.160/28 via 10.37.160.1 dev bond0 
+172.16.176.0/26 dev bond2  proto kernel  scope link  src 172.16.176.46 
+192.168.162.0/24 dev eth0  proto kernel  scope link  src 192.168.162.59
+
+To permanently set a route to survive a reboot edit the 
+
+/etc/sysconfig/network-scripts/route-bond0 if the port is dual homed or
+/etc/sysconfig/network-scripts/route-eth0 if the port is single connected
+
+Steps to add a route to the /etc/sysconfig/network-scripts/route-bond0
+restart the network service to make it stick
+
+vi /etc/sysconfig/network-scripts/route-bond0
+add the following under #for cloudmark GUI access
+
+135.52.136.0 via 10.37.160.1
+135.52.127.0 via 10.37.160.1
+135.52.85.0 via 10.37.160.1
+135.61.166.0/24 via 10.37.160.1  <== the /24 sets netmask to 255.255.255.0
+
+To manually add a route defining netmask
+route add -net 192.168.55.0 netmask 255.255.255.0 gw 192.168.1.254 dev eth1
+is the same thing as
+ip route add 192.168.55.0/24 via 192.168.1.254 dev eth1
+
+ip route add 135.165.37.0/24 via 10.37.160.1 dev bond0
+test to see if vpn can access the new mta
+ip route add 135.28.0.0/21 via 107.76.225.8 dev bond0
+
+To delete a route
+ip route delete 135.52.136.0 via 10.37.160.1 dev bond0
+ip route delete 141.204.19.0 via 10.37.160.1 dev bond0
+
+ip route add 135.165.37.0/24 via 166.216.166.1 dev bond2
+netmask is 255.255.252.0
+route add -net 166.216.0.0 netmask 255.255.252.0 gw 166.216.166.1 dev bond2
+ip route add 166.216.0.0/22 via 166.216.166.1 dev bond1
+ping 166.216.136.41
+
+
+To change the netmask to 255.255.255.0 you can do this
+[root@stcceg-mtmta02 ~]# netstat -nr |grep 135.52.136.0
+############# netmask 255.255.255.255 you want 255.255.255.0###########
+135.5135.52.136.0    10.37.160.1     255.255.255.255 UGH       0 0          0 bond0
+[root@stcceg-mtmta02 ~]# ip route delete 135.52.136.0 via 10.37.160.1 dev bond0
+[root@stcceg-mtmta02 ~]# ip route add 135.52.136.0/24 via 10.37.160.1 dev bond0
+[root@stcceg-mtmta02 ~]# netstat -nr |grep 135.52.136.0
+############# netmask is now 255.255.255.0 ############################
+135.5135.52.136.0    10.37.160.1     255.255.255.0   UG        0 0 
+
+Now you want to change this, first you have to delete this newly added
+route correctly
+ip route delete 135.52.136.0/24 via 10.37.160.1 dev bond0
+
+Next add a /23
+ip route add 135.52.136.0/23 via 10.37.160.1 dev bond0
+[root@stcceg-mtmta02 ~]# netstat -nr |grep 135.52.136.0
+135.52.136.0    10.37.160.1     255.255.254.0   UG        0 0          0 bond0
+
+Now delete again and put it back to 255.255.255.0
+[root@stcceg-mtmta02 ~]# ip route delete 135.52.136.0/23 via 10.37.160.1 dev bond0
+[root@stcceg-mtmta02 ~]# ip route add 135.52.136.0/24 via 10.37.160.1 dev bond0
+[root@stcceg-mtmta02 ~]# netstat -nr |grep 135.52.136.0
+135.52.136.0    10.37.160.1     255.255.255.0   UG        0 0          0 bond0
+
+
+Another example, this time using /23
+[root@stcceg-mtmta03 ~]# netstat -nr |grep 135.52.136.0
+135.52.136.0    10.37.160.1     255.255.255.255 UGH       0 0          0 bond0
+[root@stcceg-mtmta03 ~]# ip route delete 135.52.136.0 via 10.37.160.1 dev bond0
+[root@stcceg-mtmta03 ~]# ip route add 135.52.136.0/23 via 10.37.160.1 dev bond0
+[root@stcceg-mtmta03 ~]# netstat -nr |grep 135.52.136.0
+135.52.136.0    10.37.160.1    
+ 255.255.254.0   UG        0 0     
+
+ip route add 107.76.168.213 via 10.37.160.1 dev bond0
+
+for adding networks
+
+route add -net 90.98.69.0 netmask 255.255.254.0 dev bond0
+     0 bond0
+for alpemg-mta01-4 to STC stcceg-rep01/2 for port 389 
+ ip route add 172.16.176.0/23 via 107.78.96.1 dev bond2
+for alpemg-mta01-4 to OBS load balancers in STC, VTC, Bothel, Allen
+ip route add 166.216.136.17 via 107.78.96.1 dev bond2    Allen
+ip route add 166.216.136.26 via 107.78.96.1 dev bond2    Bothel
+ip route add 166.216.136.33 via 107.78.96.1 dev bond2    STC
+ip route add 166.216.136.41 via 107.78.96.1 dev bond2    VTC
+
+making bond1 the default gateway
+route add default gw 166.216.149.1 bond1
+the default gateway is defined inthis file 
+/etc/sysconfig/network
+
+/var/log/messages on mta03 and mta02
+
+[root@alpemg-mtmta03 ~]# ip route add 107.78.123.20 via 107.78.96.1 for NPP nodes
+# for the NPP nodes from VTC inbound MTA
+ip route add 107.78.123.20 via 107.78.96.1
+ip route add 107.78.123.21 via 107.78.96.1
+ip route add 107.78.123.22 via 107.78.96.1
+ip route add 107.78.123.23 via 107.78.96.1
+ip route add 107.78.123.24 via 107.78.96.1
+ip route add 107.78.123.25 via 107.78.96.1
+ip route add 107.79.12.20 via 107.78.96.1
+ip route add 107.79.12.21 via 107.78.96.1
+ip route add 107.79.12.22 via 107.78.96.1
+ip route add 107.79.12.23 via 107.78.96.1
+ip route add 107.79.12.24 via 107.78.96.1
+ip route add 107.79.12.25 via 107.78.96.1
+
+ping 107.78.123.20
+ping 107.78.123.21
+ping 107.78.123.22
+ping 107.78.123.23
+ping 107.78.123.24
+ping 107.78.123.25
+ping 107.79.12.20
+ping 107.79.12.21
+ping 107.79.12.22
+ping 107.79.12.23
+ping 107.79.12.24
+ping 107.79.12.25
+
+[root@alpemg-mtmta03 ~]# ip route add 107.78.123.20 via 107.78.96.1 for NPP nodes bearer svc network
+# for the NPP nodes from VTC inbound MTA
+ip route add 107.78.123.20 via 107.78.96.1
+ip route add 107.78.123.21 via 107.78.96.1
+ip route add 107.78.123.22 via 107.78.96.1
+ip route add 107.78.123.23 via 107.78.96.1
+ip route add 107.78.123.24 via 107.78.96.1
+ip route add 107.78.123.25 via 107.78.96.1
+ip route add 107.79.12.20 via 107.78.96.1
+ip route add 107.79.12.21 via 107.78.96.1
+ip route add 107.79.12.22 via 107.78.96.1
+ip route add 107.79.12.23 via 107.78.96.1
+ip route add 107.79.12.24 via 107.78.96.1
+ip route add 107.79.12.25 via 107.78.96.1
+
+ping 107.78.123.20
+ping 107.78.123.21
+ping 107.78.123.22
+ping 107.78.123.23
+ping 107.78.123.24
+ping 107.78.123.25
+ping 107.79.12.20
+ping 107.79.12.21
+ping 107.79.12.22
+ping 107.79.12.23
+ping 107.79.12.24
+ping 107.79.12.25
+
+Routes for NPP OAM IP 
+
+ip route add 107.76.142.32/27 via 107.76.224.1
+ip route add 107.246.10.96/27 via 107.76.224.1
+ip route add 166.216.136.41 via 107.78.96.1
+
