@@ -1,0 +1,28 @@
+Fun with Solaris Routing
+
+Show the route and netmask
+
+netstat -nrv
+
+If you want to persistantly add a route
+
+route -p add 10.37.161.185\23 10.37.160.0 web02 for EMG 2.75
+route -p add 10.37.161.179\23 10.37.160.0 web01 for EMG 2.75
+
+It should show up in this file, so on a reboot it sticks
+/etc/inet/static_routes
+
+http://10.37.161.179/do/admin
+VTC route adds
+route add 166.216.196.105 166.216.166.1
+route add 166.216.163.137 166.216.166.1
+
+Bothell
+route add 166.216.196.105 166.216.230.1
+route add 166.216.163.137 166.216.230.1
+
+Allen 
+route add 166.216.196.105 166.216.198.1
+route add 166.216.163.137 166.216.198.1
+
+
