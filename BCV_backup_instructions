@@ -1,0 +1,196 @@
+BCV Backup/Restore TEST Guide 
+NOTE: See the BCV Test Overview at the bottom of this Twiki 
+
+NOTE: You may need an IWOS to the Netbackup group to do the restore from EDL for the COLD BACKUP RESTORE 
+
+Also NOTE: If you follow the section below on creating the tool scripts during all this testing will be a LOT less frustrating and easier to do.
+This is best done during the BcvGoldScriptSetup procedure so they will be in place when this testing needs to be done. 
+
+(Keywords: bcv testing procedure oracle dba) 
+
+Some Definitions 
+COLD BACKUP - Oracle is shutdown on host and BCV's sync'ed and split and then backup is done to EDL on the associate Netbackup media server. 
+GOLD COPY - same as COLD backup above 
+
+HOT BACKUP - Oracle is UP on DB node, BCV's are sync'ed and split but backup to tape is disabled (see section on this below). 
+
+HOT BACKUP RESTORE - Oracle is DOWN on the DB node, and the STD's are restored from BCV's with the "symmir restore" command. 
+
+HOT BACKUP FILE RESTORE - Oracle can be UP or DOWN on the DB node, the BCV's are mounted on the media server, and the files
+that the DBA wants are scp'd back to the DB node to a temporary location, like /var/tmp/RESTORE 
+
+COLD BACKUP RESTORE - Database is DOWN on the DB host and Veritas disk groups are DEPORTED, then a restore from EDL is done to BCV's 
+and then a RESTORE from BCV is done. The Netbackup team will do the restore - give them the policy name and specify ALL files. 
+
+
+The Procedures 
+
+COLD BCV backup 
+See also procedure in the Twiki BcvColdBackup for more details if you need them. Note: The reason the "hbu" script isn't run from the host
+is because the script sends 'sql' commands to Oracle, and since Oracle is DOWN, these commands and hence, the script, will fail. 
+1) DBA will stop database (VCS Oracle serve will need to be frozen)
+2) On media server, do: symmir -g <sym_dg > establish -noprompt
+
+3) Check that all are in "Synchronized" mode, then do
+4) symmir -g <sym_dg > -instant split -noprompt
+
+5) On media server: /appl/backup-scripts/<complex_name > /complex_name-bcv-backup-wrapper
+
+6) Note the log file name and monitor the Netbackup log that it is working OK.
+
+
+
+RESTORE entire disk group from COLD BACKUP 
+1) The DBA must stop Oracle on the database node (oracle service must be frozen in VCS)
+2) On the DB node: Unmount all of the data Oracle volumes, stop VxVM volumes with vxvol -g <vxvm_dg_name > stopall 
+and deport the disk group: vxdg deport <vxvm_dg_name > (Note: If under VCS, the diskgroup may be already automatically unmounted and deported.) Or, if not, use the unmountem_deport script that you created above. 
+
+3) Media server: Check that the devices are in SPLIT state: symmir -g <vxvm_dg_name > query 
+4) Media server: FSCK and MOUNT the BCV's using the import_fsckem script that you created on the media server or run manually.
+5) Media server: Ask Netbackup team to do a FULL restore using the backup that was done for the COLD BACKUP above.
+6) Media server: Unmount and deport the VxVM disk group with the unmountem_deport script or do it manually.
+7) Media server: Restore back to STD's from BCV's with: symmir -g <device_group_name > restore -noprompt 
+8) Media server: Check that all devices are in RESTORED status with: symmir -g <device_group_name > query 
+9) Media server: split the BCV's: symmir -g <device_group_name > -instant split -noprompt 
+10) DB node: Import the VxVM disk group: vxdg -Ct import <vxvm_dg_name > (Or use the import_fsckem script.)
+
+11) DB node: Start the volumes: vxvol -g <vxvm_dg_name > startall (Or use the mountem script.)
+
+12) DB node: Fsck the volumes with the fsckem script that you created above.
+13) DB node: Mount the volumes using the mountem script that you created above.
+14) Notify the DBA that you are done restoring Oracle from HOT BACKUP
+15) Done
+
+
+
+HOT BCV Backup 
+1) On the associated media server, disable the bcvbackup-wrapper script by making it mode 600. This disables the script while not having to edit any script.
+It also make it easy to spot the problem in the DB hosts log files if the script is accidentally left not executable.
+2) On the host running Oracle, start the FULL backup. I do this by taking the "hbu full" line from
+the crontab and put it in a file, like /tmp/foo, so that /tmp/foo contains:
+
+X=/bkup/hbu/hbu_wrapper; [ -x $X ] && $X full >/dev/null 2>&1 
+
+3) Start the backup with 'at': at now < /tmp/foo. You should see a new 'full' log file.
+4) Monitor the log file - you should see a failure when the script tries to call the bcvbackup-wrapper script.
+5) Hot backup complete (don't forget to chmod 755 on the bcvbackup-wrapper script when you're done with ALL testing). 
+
+
+RESTORE entire disk group from HOT BACKUP 
+1) The DBA will stop Oracle on the database node (oracle service must be frozen in VCS)
+2) On the DB node: Unmount all of the Oracle volumes with the unmountem script that you created above. Or use the unmountem_deport script
+for unmounting and deporting the DG
+Note you may get locked error, if so use this command: /opt/VRTS/bin/umount -o mntunlock=VCS /appl/oracle 
+3) DB node: Stop VxVM for the disk group with: vxvol -g <vxvm_dg_name > stopall
+
+4) DB node: Deport the disk group: vxdg deport <vxvm_dg_name > 
+
+5) Media server: Restore form BCV's with:
+
+symmir -g <device_group_name > -full restore -noprompt 
+
+6) Media server: Check that all devices are in Restored status with:
+
+symmir -g <device_group_name > query
+
+7) Media server: When all devices show Restored split the BCV's:
+
+symmir -g <device_group_name > -instant split -noprompt 
+
+8) DB node: Import the VxVM disk group:
+
+vxdg -Ct import <vxvm_dg_name > 
+
+9) DB node: Start the volumes: vxvol -g <vxvm_dg_name > startall
+
+10) DB node: Fsck the volumes with the fsckem script that you created above.
+11) DB node: Mount the volumes using the mountem script that you created above.
+12) Notify the DBA that you are done restoring Oracle from HOT BACKUP
+10) Done
+
+
+
+Restore files from HOT BACKUP 
+1) The DBA will give you the names of at least two files to recover from HOT BACKUP
+2) Import the Veritas disk group with: vxdg -Ct import <dg_name > 
+
+3) Start the volumes: vxvol -g startall
+4) Fsck the volumes with the fsckem script that you created above.
+5) Mount the volumes using the mountem script that you created above.
+6) Retrieve the files and scp them back to the database node. I like to create a temporary user on the DB node and scp the files to /var/tmp/RESTORE
+(don't forget permissions on that directory.
+7) Unmount the partitions using "unmountem" (if you mounted everything) or just unmount the partitions that you mounted.
+8) Stop the volumes: vxvol -g 
+9) Deport the disk group
+10) Done
+
+
+
+Tools That Can Be Used And How to Create Them 
+These tools can be very handy for restoring files and filesystems should the need arise so please leave them in the TOOLS directory.
+If you have these scripts in place the testing is a BREEZE 
+
+import_fsckem - Imports and starts the VxVM disk group and runs an fsck on each volume. 
+
+mountem - mounts each volume in the disk group 
+
+unmountem_deport - Unmounts each volume, then stops the volumes and deports the VxVM disk group. 
+
+These tools should be created in a TOOLS directory on the DB node in /bkup/hbu and on the media server in /appl/backup_scripts/<complex_name > . 
+
+Below is a script that I came up with that creates these scripts. Copy and paste this text into a script called toolmake or toolmake.sh in the TOOLS directory and run it
+when the file systems are mounted; on the DB host run it when Oracle is up and running so you know it's good. On the media server, run it when after you
+get the FULL BCV backup running and the VxVM disk group is mounted on the media server. Here's the script: 
+
+
+#!/bin/sh
+#
+# Simple script to create mount/unmount scripts for BCV testing and system restores
+#
+
+usage() {
+        echo "toolmake <VxVM dg group name>"
+        exit
+}
+
+if [ $# -lt 1 ]; then
+        usage;
+else
+        #Create script to fsck volumes:
+        echo creating import_fsckem script
+        echo "echo importing $1" > import_fsckem
+        echo "vxdg -Ct import $1" >> import_fsckem
+        echo "echo starting volumes" >> import_fsckem
+        echo "vxvol -g $1 startall" >> import_fsckem
+        mount | grep $1 | awk '{printf("fsck -F vxfs -y %s\n", $3)}' | sed 's/dsk/rdsk/' >> import_fsckem
+        chmod +x import_fsckem
+        #Create script to mount volumes:
+        echo creating mountem script
+        echo "echo mounting volumes" > mountem
+        mount | grep $1 | awk '{printf("mount -F vxfs %s %s\n", $3, $1)}' >> mountem
+        chmod +x mountem
+        #Create script to unmount the volumes and deport the disk group:
+        echo creating unmountem_deport script
+        echo "echo unmounting volumes" > unmountem_deport
+        cat mountem | awk '{printf("umount %s\n", $5)}' >> unmountem_deport
+        echo "vxvol -g $1 stopall" >> unmountem_deport
+        echo "vxdg deport $1" >> unmountem_deport
+        chmod +x unmountem_deport
+fi
+
+From the DBA's: 
+BCV Test Overview courtesy of the DBA's 
+
+
+The cluster should be frozen 
+DBA shutdown the database 
+SAN run cold backup to edl, make sure that they don't have backup running in cron it will overwrite your cold backup 
+DBA do the preparations in the BCV doc. 
+San run FULL HOT backup, keep on disk. 
+DBA follow document. 
+SAN run FULL restore. 
+SAN also do a single file restore to the /tmp directory 
+DBA follow document. ie. full restore recovery 
+DBA do single file restore recovery. 
+SAN restore from cold backup 
+DBA bring db up from cold backup. 
