@@ -1,4 +1,4 @@
-#!/opt/tools/bin/perl
+#!/usr/bin/perl
 # this script will clean out files ending with txt under the
 # /var/tmp directory
 
@@ -8,11 +8,20 @@ use warnings;
 
 my $tmp_path="/var/tmp";
 
+print "\n";
+print $tmp_path;
+print "\n";
+print "current path this will look in";
+print "\n";
+
 my $currenttime = time();
 
 print $currenttime . "\n";
 $currenttime = $currenttime - 604800;
 print $currenttime . "\n";
+print "\n";
+print "the second time is set for 1 week back";
+print "\n";
 
 opendir(D, $tmp_path) || die "can't open $tmp_path: $!";
 
