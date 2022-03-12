@@ -20,7 +20,7 @@ print $currenttime . "\n";
 $currenttime = $currenttime - 604800;
 print $currenttime . "\n";
 print "\n";
-print "the second time is set for 1 week back";
+print "the second time line is set for 1 week back";
 print "\n";
 
 opendir(D, $tmp_path) || die "can't open $tmp_path: $!";
