@@ -1,7 +1,7 @@
 - 👋 Hi, I’m @drakem58
 - 👀 I’m interested in automation using ansible and terraform
 - 🌱 I’m currently learning terraform by a company called gruntworks
-- 💞️ I’m looking to collaborate on python3 using jinja2 for automating AWS deployments
+- 💞️ I’m looking to study for the CISSP exam
 - 📫 How to reach me ... mdrake58@protonmail.com 
 
 <!---
