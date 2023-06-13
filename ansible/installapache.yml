@@ -1,0 +1,4 @@
+ cat  install.yml
+---
+- name: install httpd package
+  yum: name=httpd state=latest

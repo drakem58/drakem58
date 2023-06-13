@@ -1,0 +1,4 @@
+ cat service.yml
+---
+- name: start and enable httpd service
+  service: name=httpd state=restarted enabled=yes
