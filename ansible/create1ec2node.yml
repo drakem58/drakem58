@@ -1,0 +1,17 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Launch EC2 instance
+      ec2:
+        image: ami-063a9ea2ff5234    # AMI ID
+        instance_type: t3           # Instance type
+        key_name: your_key_name     # Key pair name
+        security_groups:            # Security group name(s)
+          - forest
+        region: us-east-1           # AWS region
+      register: ec2_instance
+
+    - name: Print instance information
+      debug:
+        var: ec2_instance

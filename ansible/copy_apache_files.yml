@@ -1,0 +1,13 @@
+[root@pluto8 tasks]# cat configure.yml
+---
+
+- name: copy httpd configuration file
+  copy:
+    src: files/httpd.conf
+    dest: /etc/httpd/conf/httpd./conf
+- name: copy index.html file
+  copy:
+    src: files/index.html
+    dest: /var/www/html
+    notify:
+      - restart apache

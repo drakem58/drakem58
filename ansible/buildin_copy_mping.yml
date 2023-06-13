@@ -1,0 +1,11 @@
+- hosts: [appserver_west]
+gather_facts: no
+tasks:
+- name: Another symbolic mode example, adding some permissions and removing others
+    copy:
+    src: /home/md6270/python3/mping.py
+    dest: /var/mping.py
+    owner: md6270
+    group: wheel
+    mode: u+rw,g-wx,o-rwx
+    backup: yes
