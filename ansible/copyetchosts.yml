@@ -1,0 +1,14 @@
+- name: Copy hosts file
+  hosts: [prod_one]
+  become: true
+
+  tasks:
+    - name: Get the content of the hosts file
+      slurp:
+        src: /etc/hosts
+      register: hosts_content
+
+    - name: Copy hosts file contents
+      copy:
+        content: "{{ hosts_content.content | b64decode }}"
+        dest: /etc/hosts
