@@ -133,37 +133,23 @@ sub full_backup()
     my %logseq = ();
     $str_previous_sid = '';
     
-    ### Commented out by Ken G 11/01
-    ## Lan
-    #$sid = $ora_psid;
-    ##$ENV{ORACLE_SID} = $ora_psid;
-    #$ENV{ORACLE_SID} = $ora_sid[0];
-    #sqlplus("alter system archive log current");
-    ## Lan
-    ### Commented out by Ken G 11/01
-    
-    foreach my $sid (@ora_sid)
     {
         $ENV{ORACLE_SID} = $sid;
-        trace("Oracle Sid = $sid");                 #Added by Ken G on 11/01
+        trace("Oracle Sid = $sid");                 
         my $dest = "$bkup_dir/$sid/archive_dest/hbu";
         trace ("Backup Archive Log Destination: $dest");
-        trace(" switching logfile for $sid");         #  Added by Ken G on 11/01
-        #sqlplus("alter system archive log current;");  # Added by Ken G on 11/01
+        trace(" switching logfile for $sid");         
+        #sqlplus("alter system archive log current;");  
         trace ("Backup Archive Log Destination: $dest");
-        clean_dir($dest) if $clean_dir eq 1;        # Added by Ken G on 11/01
+        clean_dir($dest) if $clean_dir eq 1;        
         $logseq{$sid} = get_current_log;
         trace "current/active archive log = $logseq{$sid}";
-        #sqlplus("alter database backup controlfile to '$dest/control.$datestamp';"); # Removed by Ken G 1/2/07
-        #sqlplus("alter system switch logfile;");
-        # Add check for RAC with 2nd oracle instance
-        # Add If for second SID, If 2nd SID then skip alter tablespace begin backup
         if ( $ORACLE_RAC =~ m/enabled/ ){
             trace "INSIDE ORACLE_RAC: previous sid : $str_previous_sid current sid: $sid";
             if ( $str_previous_sid eq '' ) {
                 trace "INSIDE IF COMP: previous sid : $str_previous_sid current sid: $sid";
-                sqlplus("alter system archive log current;"); # Added by Ken G 1/2/07
-                sqlplus("alter database backup controlfile to '$dest/control.$datestamp';"); # Added by Ken G 1/2/07
+                sqlplus("alter system archive log current;"); 
+                sqlplus("alter database backup controlfile to '$dest/control.$datestamp';"); 
                 foreach my $tblspc (get_tblspaces)
                 { sqlplus("alter tablespace $tblspc begin backup;"); }
             }
@@ -175,9 +161,6 @@ sub full_backup()
         $str_previous_sid = $sid;
         trace "previous sid : $str_previous_sid current sid: $sid";
     }
-    #sqlplus("alter system switch logfile;");
-    # END If for second SID, If 2nd SID then skip alter tablespace begin backup
-    
     # Stops and Verify App before Splitting the BCV
     if ($DB_and_APP_Backup =~ m/enabled/i){
         appcmd(qq{ $AppStopScript }) if $AppStopScript ne '';
@@ -204,12 +187,12 @@ sub full_backup()
             if ( $str_previous_sid eq '' ) {
                 foreach my $tblspc (get_tblspaces)
                     { sqlplus("alter tablespace $tblspc end backup;"); }
-                sqlplus("alter system archive log current;"); # Added by Ken G 1/2/07
+                sqlplus("alter system archive log current;"); 
             }
         }else{
             foreach my $tblspc (get_tblspaces)
                 { sqlplus("alter tablespace $tblspc end backup;"); }
-                sqlplus("alter system archive log current;"); # Added by Ken G 1/2/07
+                sqlplus("alter system archive log current;"); 
         }
         $str_previous_sid = $sid;
         trace "previous sid : $str_previous_sid current sid: $sid";
@@ -218,16 +201,9 @@ sub full_backup()
         copy_logs($sid,$logseq{$sid});
         trace ("returned from copy_logs");
         #trace("END BACKUP: switching logfile for $sid");
-        #sqlplus("alter system switch logfile current;");  # Added by Ken Gu 11/01
+        #sqlplus("alter system switch logfile current;");  
     }
     
-    #### Commented out by Ken G 11/01
-    ## Lan
-    #$sid = $ora_psid;
-    #$ENV{ORACLE_SID} = $ora_sid[0];
-    #sqlplus("alter system archive log current");
-    ## Lan
-    #### Commented out by Ken G 11/01
     
     trigger_remote unless $split_rc;
     bpcmd(qq{bpbackup -w -p $bp_policy -s $bp_sched -h $bp_client -S $bp_master -L $hbu_log $bkup_dir/*/archive_dest});
@@ -243,38 +219,31 @@ sub full_backup()
 sub arch_backup() {
     lock('arch');
     
-    ###### Commented out by Ken G on 11/01
-    # Lan
-    #$sid = $ora_psid;
-    #$ENV{ORACLE_SID} = $ora_psid;
-    #sqlplus("alter system archive log current");
-    # Lan
-    ###### Commented out by Ken G on 11/01
    
-        trace("hbu.conf arch_dst = $arch_dst"); # Added by Ken G on 11/01
-        trace("hbu.conf arch_src = $arch_src"); # Added by Ken G on 11/01
-        trace("hbu.conf arch_dup = $arch_dup"); # Added by Ken G on 11/01
+        trace("hbu.conf arch_dst = $arch_dst"); 
+        trace("hbu.conf arch_src = $arch_src"); 
+        trace("hbu.conf arch_dup = $arch_dup");
         $arch_dst_conf = 'ND' if $arch_dst eq '';
         $arch_src_conf = 'ND' if $arch_src eq '';
         $arch_dup_conf = 'ND' if $arch_dup eq '';
         trace("arch_dst_conf -->$arch_dst_conf<--");
         trace("arch_src_conf -->$arch_src_conf<--");
         trace("arch_dup_conf -->$arch_dup_conf<--");
-        #sqlplus("alter system archive log current;");  # Added by Ken G on 11/01
+        #sqlplus("alter system archive log current;");  
     
    foreach my $sid ( @ora_sid ) {
         trace ("arch_backup : $sid ");
-        #trace("hbu.conf arch_dst = $arch_dst"); # Added by Ken G on 11/01
-        #trace("hbu.conf arch_src = $arch_src"); # Added by Ken G on 11/01
-        #trace("hbu.conf arch_dup = $arch_dup"); # Added by Ken G on 11/01
+        #trace("hbu.conf arch_dst = $arch_dst"); 
+        #trace("hbu.conf arch_src = $arch_src");
+        #trace("hbu.conf arch_dup = $arch_dup"); 
         $arch_dst = "$bkup_dir/$sid/arch/hbu" if $arch_dst_conf eq 'ND';
         $arch_src = "$ora_logs/$sid/arch" if $arch_src_conf eq 'ND';
         $arch_dup = "$bkup_dir/$sid/arch" if $arch_dup_conf eq 'ND';
-        trace("arch_dst = $arch_dst"); # Added by Ken G on 11/01
-        trace("arch_src = $arch_src"); # Added by Ken G on 11/01
-        trace("arch_dup = $arch_dup"); # Added by Ken G on 11/01
+        trace("arch_dst = $arch_dst"); 
+        trace("arch_src = $arch_src"); 
+        trace("arch_dup = $arch_dup"); 
         $ENV{ORACLE_SID} = $sid;
-        sqlplus("alter system archive log current;") if $sid eq $ora_sid[0];  # Added by Ken G on 11/01
+        sqlplus("alter system archive log current;") if $sid eq $ora_sid[0];  
         my $oldest_online = get_oldest_log;
         trace("sid:$sid");
         trace("oldest_online:$oldest_online");
@@ -560,10 +529,7 @@ sub bpcmd($)
    my $bpcmd = shift;
    chomp $bpcmd;
 
-# Added by Lan Zhou on 11/06/2007 to make sure netbackup installed
-#Lan
    opendir(DIR, $bp_bin) or die "Can't open $bp_bin: $!";
-# Lan
 
    trace "exec < $bp_bin/$bpcmd >";
    do
