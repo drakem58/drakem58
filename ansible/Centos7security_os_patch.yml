@@ -1,0 +1,24 @@
+---
+- name: Update patching for Centos 7 nodes
+  hosts: prod3
+  become: true
+  tasks:
+    - name: Update OS patches
+      yum:
+        name: '*'
+        state: latest
+      register: os_patches
+
+    - name: Update security patches
+      yum:
+        name: '*'
+        security: yes
+        state: latest
+      register: security_patches
+
+    - name: Display updated packages for OS and security
+      debug:
+        var: item
+      with_items:
+        - "{{ os_patches }}"
+        - "{{ security_patches }}"
