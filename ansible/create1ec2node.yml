@@ -10,8 +10,6 @@
         security_groups:            # Security group name(s)
           - forest
         region: us-east-1           # AWS region
-        instance_tags
-          Name:  saturn.solarsys.test.net
       register: ec2_instance
 
     - name: Print instance information

@@ -1,0 +1,49 @@
+steps for doing roles in Ansible
+
+Prerequisites
+	be sure if you are deploying a package like httpd (apache) it is in a reachable repo from the ansible server
+		yum provides */httpd can tell you this
+		you may need to create a small file repo off the ansible server so it can access it
+	be sure if there are any configuration files to copy, they are sitting on the ansible master and can be access
+	by the user doing the install
+	
+	cd /etc/ansible/roles
+	ansible-galaxy init apache
+		this will auto create several subfolders
+		apache
+├── defaults --> default variables for the role
+│   └── main.yml
+├── files  --> contains files that are to be copied to another server landing in the directory specified in the install.yml
+│   ├── httpd.conf
+│   └── index.html
+├── handlers  -->  contains handlers for this role but can be reused in other roles
+│   └── main.yml
+├── meta  --> this is where you set you name and other informative stuff
+│   └── main.yml
+├── README.md
+├── tasks --> where the main list of yaml files that do the work sit
+│   ├── configure.yml
+│   ├── install.yml
+│   ├── main.yml
+│   └── service.yml
+├── templates
+├── tests
+│   ├── inventory
+│   └── test.yml
+└── vars  --> other variables for the role, has higher priority than default
+    └── main.yml
+	
+start configuring the yaml files used in tasks
+copy needed files into the files folder in this case httpd.conf, index.html and passenger module
+edit the main.yml in the handlers, for this restarting apache
+edit the main.yml in the meta folder, put in your name, description, and company name
+now create the kick off file that will launch this runapachesetup.yml, in here you will edit which role to launch
+check for syntax errors
+	ansible-playbook /etc/ansible/runapachesetup.yml --syntax-check
+check that it actually loaded and is running
+	log into 192.168.1.105, systemctl status httpd
+	from the ansible server, elinks http//192.168.1.105
+
+=============================================================
+you can also create EC2 node directly from command line
+ansible all -m ec2 -a "count=1 instance_type=t3 ami=ami-063a9ea2ff5234 group=forest region=us-east-1 instance_tags='Name=saturn.solarsys.test.net'"
