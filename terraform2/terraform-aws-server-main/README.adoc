@@ -1,0 +1,89 @@
+:type: service
+:name: Single EC2 Instance
+:icon: /_docs/aws-ec2.png
+:description: Tools and utilities for running an EC2 instance, including configuring it with an IAM role, security group, EIP, ENI, EBS Volumes, and more.
+:category: Server orchestration
+:cloud: aws
+:tags: ec2, server, eni, ebs, instance
+:license: gruntwork
+:built-with: terraform
+
+// AsciiDoc TOC settings
+:toc:
+:toc-placement!:
+:toc-title:
+
+// GitHub specific settings. See https://gist.github.com/dcode/0cfbf2699a1fe9b46ff04c41721dda74 for details.
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+= Module Server
+
+image:https://img.shields.io/badge/maintained%20by-gruntwork.io-%235849a6.svg[link="https://gruntwork.io/?ref=repo_terraform-aws-server"]
+image:https://img.shields.io/badge/tf-%3E%3D1.1.0-blue.svg[Terraform version]
+
+This repo contains modules that help to deploy, manage, and configure EC2 instances in https://aws.amazon.com[AWS],
+including configuring an IAM role, security group, EIP, ENI, EBS Volumes, and more.
+
+image::_docs/single-ec2-instance-architecture.png?raw=true[Module Server]
+
+
+
+toc::[]
+
+== Features
+
+* Deploy a single EC2 instance along with the all the resources it typically needs, such as an Elastic IP address, Route 53 DNS entry, IAM Role and IAM instance profile, and security group
+* Mount and unmount EBS Volumes on your EC2 Instances for Volumes that need to persist between redeploys of the Instance
+* Create a DNS A record in Route 53 pointing to the EC2 Instance
+* Configure a DNS A record pointing to the instance's IP address.
+
+
+== Learn
+
+=== Core concepts
+* link:https://gruntwork.io/guides/foundations/how-to-configure-production-grade-aws-account-structure/#iam-users[Learn about IAM Users, Roles and Policies]
+* link:https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html[What is Amazon EC2?]
+* link:https://aws.amazon.com/answers/security/aws-securing-ec2-instances/[Securing Amazon EC2 Instances]
+* link:https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html[Learn about Elastic IP Addresses]
+* link:https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html[What is Amazon Route 53?]
+* link:https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AmazonEBS.html[Learn about Amazon EBS]
+
+=== Repo organization
+
+* link:/modules[modules]: the main implementation code for this repo, broken down into multiple standalone, orthogonal submodules.
+* link:/examples[examples]: This folder contains working examples of how to use the submodules.
+* link:/test[test]: Automated tests for the modules and examples.
+
+== Deploy
+=== Non-production deployment (quick start for learning)
+If you just want to try this repo out for experimenting and learning, check out the following resources:
+
+link:/examples[examples folder]: The examples folder contains sample code optimized for learning, experimenting, and testing (but not production usage).
+
+=== Production deployment
+
+We do not have any production examples of single-server, as we typically use Amazon Scaling Groups(ASGs) for high availability.
+
+For production examples of `mount-ebs-volume` and `attach-eni`, you can view the link:https://github.com/gruntwork-io/infrastructure-modules-multi-account-acme/tree/5fcefff/data-stores/zookeeper[ZooKeeper module].
+
+
+== Support
+
+If you need help with this repo or anything else related to infrastructure or DevOps, Gruntwork offers https://gruntwork.io/support/[Commercial Support] via Slack, email, and phone/video. If you're already a Gruntwork customer, hop on Slack and ask away! If not, https://www.gruntwork.io/pricing/[subscribe now]. If you're not sure, feel free to email us at link:mailto:support@gruntwork.io[support@gruntwork.io].
+
+
+== Contributions
+
+Contributions to this repo are very welcome and appreciated! If you find a bug or want to add a new feature or even contribute an entirely new module, we are very happy to accept pull requests, provide feedback, and run your changes through our automated test suite.
+
+Please see https://gruntwork.io/guides/foundations/how-to-use-gruntwork-infrastructure-as-code-library/#contributing-to-the-gruntwork-infrastructure-as-code-library[Contributing to the Gruntwork Infrastructure as Code Library] for instructions.
+
+== License
+
+Please see link:LICENSE.txt[LICENSE.txt] for details on how the code in this repo is licensed.
