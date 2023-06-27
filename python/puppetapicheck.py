@@ -2,8 +2,8 @@
 
 # script that uses functions to check to see if puppet is working ok from an agent node
 
-import requests
-import json
+import requests  # allows you to send HTTP requests using Python
+import json      # does serialization of encoding data into JSON format
 
 def puppet_check():
     try:
