@@ -1,6 +1,13 @@
 [root@pluto8 tasks]# cat configure.yml
 ---
 
+- name: Decrypt secret var file
+  command: "gpg --output /some/path/to/var/file.yml --yes --decrypt /some/path/to/encrypted/var/file.yml.gpg"
+
+- name: Include the secrets
+  include_vars: /some/path/to/var/file.yml
+
+
 - name: copy httpd configuration file
   copy:
     src: files/httpd.conf
